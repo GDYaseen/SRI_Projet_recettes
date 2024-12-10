@@ -27,7 +27,7 @@ def preprocess_query(query):
 
     #radicalisation des mots 
     query_words = [stemmer.stem(word) for word in query_words ]
-    print(f"query_words : {query_words}")
+    # print(f"query_words : {query_words}")
 
     return query_words
 
@@ -47,39 +47,38 @@ def load_index_files(index_dir,query_words):
                     data = json.load(f)
                     print(f"Loaded data from {file_path}: {data}")  # Debug
                     index_data[prefix] = data  # Store the word frequency data under the prefix
-
+    print(f"[INDEX_DATA] {index_data}\n")
     return index_data
 
 # Function to build the query vector using the index base
 def build_query_vector(query_words, index_base):
-    query_vector = defaultdict(int)  # Store frequency of words in the query
+    query_vector = defaultdict(float)
+    query_length = len(query_words)
     
     for word in query_words:
-        prefix = word[:2]  # Use the first two characters to determine the prefix (e.g., 'ch' -> 'ch.json')
-        
-        if prefix in index_base:  # Only look at relevant prefix files
-            if word in index_base[prefix]:
-                for doc_id, freq in index_base[prefix][word]:
-                    query_vector[doc_id] += freq  # Add frequency to the corresponding document
-                    print(f"Word: {word}, Doc ID: {doc_id}, Frequency: {freq}")  # Debug
-        else:
-            print(f"[DEBUG] No matching prefix found for '{word}'")  # Debug: no matching prefix
+        query_vector[word] += 1 / query_length  # Normalized frequency
 
     print("Query Vector:", query_vector)  # Debug
     return query_vector
 
 # Function to build document vectors (based on the index base)
 def build_document_vectors(index_base):
-    doc_vectors = defaultdict(lambda: defaultdict(int))  # Document ID -> {word: frequency}
+    doc_vectors = defaultdict(lambda: defaultdict(float))  # Document ID -> {word: normalized frequency}
     
     for prefix in index_base:
         for word in index_base[prefix]:
             for doc_id, freq in index_base[prefix][word]:
-                doc_vectors[doc_id][word] = freq
+                doc_vectors[doc_id][word] += freq  # Sum frequencies (if split across prefixes)
+    
+    # Normalize term frequencies by document length
+    for doc_id, terms in doc_vectors.items():
+        doc_length = sum(terms.values())  # Total terms in the document
+        for word in terms:
+            terms[word] /= doc_length  # Normalize frequency
 
     return doc_vectors
 
-# Function to calculate cosine similarity between two vectors
+# Function to calculate cosine similarity between two vectors (Fonction du matching)
 def cosine_similarity(vec1, vec2):
     common_terms = set(vec1.keys()).intersection(set(vec2.keys()))
     if not common_terms:
@@ -93,20 +92,23 @@ def cosine_similarity(vec1, vec2):
         return 0.0  # If either vector is zero, similarity is 0
     
     similarity = dot_product / (norm1 * norm2)
+    print(f"\nVEC1 {vec1} ---- VEC2 {vec2} |||  {similarity}\n")
     return similarity
 
 # Function to rank documents based on relevance to the query
 def rank_documents(query, index_base):
+    print("[**********RANKING**********]")
     query_words = preprocess_query(query)  # Preprocess the query
     query_vector = build_query_vector(query_words, index_base)  # Build query vector
-    
     doc_vectors = build_document_vectors(index_base)  # Build document vectors
+    print(f"[VECTORS]  words:{query_words} --|-- query:{query_vector} --|-- doc:{doc_vectors}")
     
     # Compute cosine similarity for each document
     similarities = []
     for doc_id, doc_vector in doc_vectors.items():
         sim = cosine_similarity(query_vector, doc_vector)  # Calculate cosine similarity
-        similarities.append((doc_id, sim))  # Store document id and its similarity score
+        if(sim != 0):
+            similarities.append((doc_id, sim))  # Store document id and its similarity score
     
     # Sort documents by similarity score in descending order
     similarities.sort(key=lambda x: x[1], reverse=True)
@@ -118,7 +120,7 @@ def rank_documents(query, index_base):
 # Example usage (assuming the index base files are available)
 if __name__ == "__main__":
     # Example query
-    query = "poulet"
+    query = "poulet tomates"
     query_words = preprocess_query(query)
     
     # Load the index files from the specified directories
@@ -136,9 +138,9 @@ if __name__ == "__main__":
     index_base = {**doc_index_base}
     
     # Debug
-    print("Combined Index Base:")
-    for prefix, words in index_base.items():
-        print(f"Prefix: {prefix}, Words: {words}")
+    # print("Combined Index Base:")
+    # for prefix, words in index_base.items():
+    #     print(f"Prefix: {prefix}, Words: {words}")
         
     # Rank the documents based on relevance to the query
     ranked_docs = rank_documents(query, index_base)
