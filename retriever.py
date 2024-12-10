@@ -2,16 +2,35 @@ import os
 import json
 import numpy as np
 from collections import defaultdict
+from nltk.stem import SnowballStemmer
+import re
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
 
-# Stop words list (you can extend it)
-stop_words = {'the', 'is', 'at', 'of', 'a', 'and', 'to', 'in', 'with', 'on', 'for', 'an'}
+stemmer = SnowballStemmer("french")
 
 # Function to preprocess the query (normalize and remove stop words)
 def preprocess_query(query):
+
     query = query.lower()  # Convert to lowercase
+
+    #retenir que les lettres alphabetiques en francais et supprimer les chiffres et les espaces supplementaires
+    query = re.sub(r"[^\w\sàâäéèêëîïôöùûüç]",' ',query)
+    query = re.sub(r"\d",' ',query)
+    query = re.sub(r"\s+",' ', query)
+
     query_words = query.split()  # Split into words
-    query_words = [word for word in query_words if word not in stop_words]  # Remove stop words
+
+    #supprimer les stopwords francais comme : de, le, la, un ....
+    query_words = list(filter(lambda token: token not in stopwords.words('french'),query_words))
+
+    #radicalisation des mots 
+    query_words = [stemmer.stem(word) for word in query_words ]
+    print(f"query_words : {query_words}")
+
     return query_words
+
 
 # Function to load index files from a directory
 def load_index_files(index_dir,query_words):
@@ -26,6 +45,7 @@ def load_index_files(index_dir,query_words):
             
                 with open(file_path, 'r') as f:
                     data = json.load(f)
+                    print(f"Loaded data from {file_path}: {data}")  # Debug
                     index_data[prefix] = data  # Store the word frequency data under the prefix
 
     return index_data
@@ -41,9 +61,11 @@ def build_query_vector(query_words, index_base):
             if word in index_base[prefix]:
                 for doc_id, freq in index_base[prefix][word]:
                     query_vector[doc_id] += freq  # Add frequency to the corresponding document
+                    print(f"Word: {word}, Doc ID: {doc_id}, Frequency: {freq}")  # Debug
         else:
             print(f"[DEBUG] No matching prefix found for '{word}'")  # Debug: no matching prefix
 
+    print("Query Vector:", query_vector)  # Debug
     return query_vector
 
 # Function to build document vectors (based on the index base)
@@ -96,23 +118,28 @@ def rank_documents(query, index_base):
 # Example usage (assuming the index base files are available)
 if __name__ == "__main__":
     # Example query
-    query = "Find chocolate or vanilla recipes"
-    query_words = preprocess_query(query);
+    query = "poulet"
+    query_words = preprocess_query(query)
     
     # Load the index files from the specified directories
     doc_index_dir = './indexes/doc_indexes'
-    img_index_dir = './indexes/img_indexes'
-    vid_index_dir = './indexes/vid_indexes'
+    #img_index_dir = './indexes/img_indexes'
+    #vid_index_dir = './indexes/vid_indexes'
     
     # Load the index data
     doc_index_base = load_index_files(doc_index_dir,query_words)
-    img_index_base = load_index_files(img_index_dir,query_words)
-    vid_index_base = load_index_files(vid_index_dir,query_words)
+    #img_index_base = load_index_files(img_index_dir,query_words)
+    #vid_index_base = load_index_files(vid_index_dir,query_words)
     
     # Combine all index data into a single base
-    index_base = {**doc_index_base, **img_index_base, **vid_index_base}
+    #index_base = {**doc_index_base, **img_index_base, **vid_index_base}
+    index_base = {**doc_index_base}
     
-    
+    # Debug
+    print("Combined Index Base:")
+    for prefix, words in index_base.items():
+        print(f"Prefix: {prefix}, Words: {words}")
+        
     # Rank the documents based on relevance to the query
     ranked_docs = rank_documents(query, index_base)
     
