@@ -1,10 +1,12 @@
+import textwrap
 import ffmpeg
 import platform
 import whisper
 import torch
 import os
 import argparse
-
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 # Check if a GPU is available
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -12,10 +14,6 @@ def get_ffmpeg_path():
     os_name = platform.system().lower()
     if os_name == "windows":
         return "./bin/ffmpeg.exe"
-    # elif os_name == "linux":
-    #     return "./bin/linux/ffmpeg"
-    # elif os_name == "darwin":  # macOS
-    #     return "./bin/macos/ffmpeg"
     else:
         raise Exception("Unsupported operating system")
     
@@ -51,13 +49,52 @@ def transcribe_video(video_path):
     return transcription
 
 
-
-
+def write_transcription_to_pdf(transcription, video_name):
+    # Create a PDF with the transcription text
+    pdf_filename = f"{video_name}_transcription.pdf"
+    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    c.setFont("Helvetica", 12)
+    
+    # Add a title
+    c.drawString(70, 750, f"{video_name}")
+    
+    # Add the transcription text
+    text_object = c.beginText(70, 730)
+    text_object.setFont("Helvetica", 10)
+    text_object.setTextOrigin(100, 730)
+    
+    # Split transcription into lines if it is too long for one page
+    wrapped_text = textwrap.wrap(transcription, width=80)  # Adjust width to fit text
+    
+    for line in wrapped_text:
+        text_object.textLine(line)
+    
+    c.drawText(text_object)
+    c.showPage()
+    c.save()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Transcribe video to text.")
+    parser = argparse.ArgumentParser(description="Transcribe video to text and save as PDF.")
     parser.add_argument("video_path", help="Path to the video file")
     args = parser.parse_args()
 
-    result = transcribe_video(args.video_path)
-    print(result)
+    # Get the transcription
+    transcription = transcribe_video(args.video_path)
+    
+    # Extract the video name without extension
+    video_name = os.path.splitext(os.path.basename(args.video_path))[0]
+    
+    # Write the transcription to a PDF
+    write_transcription_to_pdf(transcription, video_name)
+    
+    print(f"Transcription has been written to {video_name}_transcription.pdf")
+
+
+
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser(description="Transcribe video to text.")
+#     parser.add_argument("video_path", help="Path to the video file")
+#     args = parser.parse_args()
+
+#     result = transcribe_video(args.video_path)
+#     print(result)
