@@ -8,15 +8,11 @@ Les index sont stockés dans le dossier `indexes` dans ce format pour chaque typ
           ap.json
           br.json
           ...
-      /img_indexes
-          cr.json
-          du.json
-          ...
-      /vid_indexes
-          fr.json
-          gi.json
-          ...
+      /faiss_indexes
+          index.faiss
+          index.pkl
 ```
+
 > [!NOTE]
 > Pour l'instant, seuls des fichiers d'exemple temporaires ont été utilisés dans le dossier des index.
 ## Recherche

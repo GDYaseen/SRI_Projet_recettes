@@ -51,7 +51,7 @@ def transcribe_video(video_path):
 
 def write_transcription_to_pdf(transcription, video_name):
     # Create a PDF with the transcription text
-    pdf_filename = f"{video_name}_transcription.pdf"
+    pdf_filename = f"data/transcriptions/{video_name}_transcription.pdf"
     c = canvas.Canvas(pdf_filename, pagesize=letter)
     c.setFont("Helvetica", 12)
     
@@ -72,29 +72,3 @@ def write_transcription_to_pdf(transcription, video_name):
     c.drawText(text_object)
     c.showPage()
     c.save()
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Transcribe video to text and save as PDF.")
-    parser.add_argument("video_path", help="Path to the video file")
-    args = parser.parse_args()
-
-    # Get the transcription
-    transcription = transcribe_video(args.video_path)
-    
-    # Extract the video name without extension
-    video_name = os.path.splitext(os.path.basename(args.video_path))[0]
-    
-    # Write the transcription to a PDF
-    write_transcription_to_pdf(transcription, video_name)
-    
-    print(f"Transcription has been written to {video_name}_transcription.pdf")
-
-
-
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description="Transcribe video to text.")
-#     parser.add_argument("video_path", help="Path to the video file")
-#     args = parser.parse_args()
-
-#     result = transcribe_video(args.video_path)
-#     print(result)
