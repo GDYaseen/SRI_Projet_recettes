@@ -1,17 +1,18 @@
-from rag_model import *
-from embeddings import *
-from helper_functions import process_llm_response, wrap_text_preserve_newlines
+from src.rag_model import *
+from src.embeddings import *
+from src.helper_functions import process_llm_response, wrap_text_preserve_newlines
 import time
 from langchain.chains import RetrievalQA
 import langchain
 # prompts
 from langchain_core.prompts import PromptTemplate
 
-
+# Temporary fix for OpenMP runtime conflict
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 #TODO: add the path to the pdfs
-pdfs = os.path.abspath("/data/transcriptions")
+pdfs = os.path.abspath("data/transcriptions")
 
 class Inference:
     def __init__(self):
@@ -44,7 +45,7 @@ keep silent about it. It is important that you only tell what can be infered fro
 
     def llm_ans(self, query):
         start = time.time()
-        llm_response = self.qa_chain(query)
+        llm_response = self.qa_chain.invoke(query)
         processed_response =process_llm_response(llm_response)
         end = time.time()
 

@@ -1,15 +1,17 @@
-from helper_functions import *
+from src.helper_functions import *
 import os
 import logging
 import time
 from dotenv import load_dotenv
-from rag_model import *
+from src.rag_model import *
 from langchain_community.vectorstores import FAISS
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+indexPath = os.path.abspath("indexes/faiss_indexes").replace("\\","/")
 
 class EmbeddingsManager:
     def __init__(self, pdfs):
@@ -18,7 +20,7 @@ class EmbeddingsManager:
 
         self.pdfs = pdfs
         # path where the vector database will be saved
-        self.embeddings_path = 'indexes/faiss_indexes'
+        self.embeddings_path = indexPath
 
         # Ensure the directory exists
         os.makedirs(self.embeddings_path, exist_ok=True)

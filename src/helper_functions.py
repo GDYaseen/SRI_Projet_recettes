@@ -1,3 +1,4 @@
+import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import textwrap
 
@@ -16,6 +17,8 @@ def split_text(documents):
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+vidsPath = os.path.abspath("data/videos").replace("\\","/")+"/"
 
 def wrap_text_preserve_newlines(text, width=700):
   lines = text.split('\n')

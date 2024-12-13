@@ -6,8 +6,8 @@ from collections import defaultdict
 from nltk.stem import SnowballStemmer
 import json
 
-path = "./data"
-path_index_docs = "./indexes/doc_indexes"
+path = os.path.abspath("data").replace("\\","/")
+path_index_docs = os.path.abspath("indexes/doc_indexes").replace("\\","/")
 
 path_filenames_list = []
 for dirname,subfolder,filename in os.walk(path) :

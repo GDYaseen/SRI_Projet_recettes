@@ -1,12 +1,12 @@
 import sys
 from flask import Flask, request, jsonify, send_from_directory
-from retriever import preprocess_query, load_index_files, rank_documents
+from src.retriever import preprocess_query, load_index_files, rank_documents
 import os
 from pypdf import PdfReader, PdfWriter
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
-from inference import Inference
-from video_transcriptor import transcribe_video, write_transcription_to_pdf
+from src.inference import Inference
+from src.video_transcriptor import transcribe_video, write_transcription_to_pdf
 
 app = Flask(__name__)
 inference = Inference()
@@ -79,19 +79,19 @@ def retrieve_documents(ranked_docs):
 # Serve static files from the images folder
 @app.route("/data/img/<path:filename>")
 def serve_image(filename):
-    return send_from_directory(images_path, filename)
+    return send_from_directory(os.path.abspath(images_path), filename)
 # Serve static files from the images folder
 @app.route("/data/videos/<path:filename>")
 def serve_videos(filename):
-    return send_from_directory(videos_path, filename)
+    return send_from_directory(os.path.abspath(videos_path), filename)
 @app.route("/data/documents/<path:filename>")
 def serve_documents(filename):
-    return send_from_directory(documents_path, filename)
+    return send_from_directory(os.path.abspath(documents_path), filename)
 
 # API endpoint to retrieve documents
 @app.route("/api/search", methods=["GET"])
 def search():
-    data = request.get_json()
+    data = request.args
     query = data.get("query")
     if not query:
         return jsonify({"error": "Query is required."}), 400
@@ -104,7 +104,7 @@ def search():
     if file_type in ("doc", "all"):
         # Process document search
         query_words = preprocess_query(query)
-        doc_index_dir = './indexes/doc_indexes'
+        doc_index_dir = os.path.abspath("indexes/doc_indexes").replace("\\","/")
         doc_index_base = load_index_files(doc_index_dir, query_words)
         ranked_docs = rank_documents(query, doc_index_base)
         documents = retrieve_documents(ranked_docs)
@@ -147,21 +147,5 @@ def details(doc_id):
                 text = ""
                 for page in pdf_reader.pages:
                     text += page.extract_text()
-                return jsonify({"id": doc_id, "text": text, "image": associated_image})
+                return jsonify({"id": doc_id, "text": text, "image": associated_image,"title":filename.split('.')[0]})
     return jsonify({"error": "Document not found."}), 404
-
-
-if __name__ == "__main__":
-
-    # if "re-vid" in sys.argv:
-    #     # Get a list of all video files in the folder (only .mp4 files)
-    #     video_files = [f for f in os.listdir(videos_path) if f.endswith(".mp4")]
-    #     for video_file in video_files:
-    #         video_path = os.path.join(videos_path, video_file)
-    #         transcription = transcribe_video(video_path)
-    #         # Extract the video name without extension
-    #         video_name = os.path.splitext(os.path.basename(video_path))[0]
-    #         # Write the transcription to a PDF
-    #         write_transcription_to_pdf(transcription, video_name)
-    
-    app.run(debug=True,port=5009)

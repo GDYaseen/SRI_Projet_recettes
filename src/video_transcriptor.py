@@ -13,7 +13,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 def get_ffmpeg_path():
     os_name = platform.system().lower()
     if os_name == "windows":
-        return "./bin/ffmpeg.exe"
+        return "../bin/ffmpeg.exe"
     else:
         raise Exception("Unsupported operating system")
     
@@ -51,7 +51,8 @@ def transcribe_video(video_path):
 
 def write_transcription_to_pdf(transcription, video_name):
     # Create a PDF with the transcription text
-    pdf_filename = f"data/transcriptions/{video_name}_transcription.pdf"
+    absPath = os.path.abspath("data/transcriptions")
+    pdf_filename = f"{absPath}/{video_name}_transcription.pdf"
     c = canvas.Canvas(pdf_filename, pagesize=letter)
     c.setFont("Helvetica", 12)
     
