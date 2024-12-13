@@ -12,9 +12,6 @@ Les index sont stockés dans le dossier `indexes` dans ce format pour chaque typ
           index.faiss
           index.pkl
 ```
-
-> [!NOTE]
-> Pour l'instant, seuls des fichiers d'exemple temporaires ont été utilisés dans le dossier des index.
 ## Recherche
 Le processus de recherche dans notre système est conçu pour rechercher et classer efficacement les fichiers en fonction de la requête d'un utilisateur. Voici une explication de chaque étape impliquée :
 
