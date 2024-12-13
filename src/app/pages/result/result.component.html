@@ -1,0 +1,89 @@
+<ng-container>
+    <div class="container mb-3" style="margin-top: 130px;">
+        <div class="row">
+            <div class="col-2 fs-4 d-flex align-items-center">You searched : </div>
+            <div class="col-8">
+                <input type="text" [(ngModel)]="query" class="form-control p-3 rounded-5"
+                    placeholder="What are you craving today?">
+
+            </div>
+            <div class="col-2 d-flex align-items-center">
+                <button (click)="search($event)"
+                    class="btn btn-primary me-0 me-sm-2 mx-1 p-3 w-100 rounded-4">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <ng-container *ngIf="fetchedData.videos.sources">
+        <section id="testimonials" class="testimonials section light-background">
+
+            <!-- Section Title -->
+            <div class="container section-title pb-3" data-aos="fade-up">
+                <h2>Videos</h2>
+            </div><!-- End Section Title -->
+
+            <div class="container">
+
+                <div class="row g-5">
+                    <ng-container *ngFor="let video of fetchedData.videos.sources">
+                        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                            <app-video [video]="video"></app-video>
+                        </div>
+                    </ng-container>
+                </div>
+
+            </div>
+
+        </section>
+    </ng-container>
+
+    <div style="height: 20px;"></div>
+
+    <ng-container *ngIf="images">
+        <section id="testimonials" class="testimonials section light-background">
+
+            <!-- Section Title -->
+            <div class="container section-title pb-3" data-aos="fade-up">
+                <h2>Images</h2>
+            </div><!-- End Section Title -->
+
+            <div class="container">
+
+                <div class="row g-5">
+                    <ng-container *ngFor="let image of images">
+                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                            <app-image [image]="image"></app-image>
+                        </div>
+                    </ng-container>
+                </div>
+
+            </div>
+
+        </section>
+    </ng-container>
+
+    <div style="height: 20px;"></div>
+
+    <ng-container *ngIf="images">
+        <section id="testimonials" class="testimonials section light-background">
+
+            <!-- Section Title -->
+            <div class="container section-title pb-3" data-aos="fade-up">
+                <h2>Links</h2>
+            </div><!-- End Section Title -->
+
+            <div class="container">
+
+                <div class="row g-5">
+                    <ng-container *ngFor="let document of fetchedData.documents">
+                        <div class="col-lg-6 p-3" data-aos="fade-up" data-aos-delay="100">
+                            <app-link [document]="document"></app-link>
+                        </div>
+                    </ng-container>
+                </div>
+
+            </div>
+
+        </section>
+    </ng-container>
+</ng-container>

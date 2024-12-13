@@ -1,0 +1,27 @@
+<ng-container>
+    <div class="container-fluid light-background section" style="margin-top: 150px;">
+        <div class="container">
+            <div class="card border-0 bg-white p-3">
+                <div class="card-header bg-white">
+                    <h2>{{ post.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p>
+                                {{ post.text }}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <img src="{{ post.image }}" style="max-height: 200px;" class="img-fluid"
+                                    alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</ng-container>
