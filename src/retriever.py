@@ -117,32 +117,3 @@ def rank_documents(query, index_base):
     ranked_docs = [doc_id for doc_id, _ in similarities]
     return ranked_docs
 
-# # Example usage (assuming the index base files are available)
-# if __name__ == "__main__":
-#     # Example query
-#     query = "poulet tomates"
-#     query_words = preprocess_query(query)
-    
-#     # Load the index files from the specified directories
-#     doc_index_dir = './indexes/doc_indexes'
-#     #img_index_dir = './indexes/img_indexes'
-#     #vid_index_dir = './indexes/vid_indexes'
-    
-#     # Load the index data
-#     doc_index_base = load_index_files(doc_index_dir,query_words)
-#     #img_index_base = load_index_files(img_index_dir,query_words)
-#     #vid_index_base = load_index_files(vid_index_dir,query_words)
-    
-#     # Combine all index data into a single base
-#     #index_base = {**doc_index_base, **img_index_base, **vid_index_base}
-#     index_base = {**doc_index_base}
-    
-#     # Debug
-#     # print("Combined Index Base:")
-#     # for prefix, words in index_base.items():
-#     #     print(f"Prefix: {prefix}, Words: {words}")
-        
-#     # Rank the documents based on relevance to the query
-#     ranked_docs = rank_documents(query, index_base)
-    
-#     print("Ranked Documents by Relevance:", ranked_docs)

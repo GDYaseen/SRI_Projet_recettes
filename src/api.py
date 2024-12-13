@@ -10,11 +10,18 @@ from src.video_transcriptor import transcribe_video, write_transcription_to_pdf
 
 app = Flask(__name__)
 inference = Inference()
-
 # Path configurations
+dist_path = os.path.abspath("dist/sri")
 documents_path = "data/documents"
 images_path = "data/img"
 videos_path = "data/videos"
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')  # Allow all origins
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+    return response
 
 # Function to retrieve documents based on ranked_docs
 def retrieve_documents(ranked_docs):
@@ -87,6 +94,13 @@ def serve_videos(filename):
 @app.route("/data/documents/<path:filename>")
 def serve_documents(filename):
     return send_from_directory(os.path.abspath(documents_path), filename)
+@app.route("/")
+def serve_index():
+    return send_from_directory(dist_path, "index.html")
+@app.route("/<path:filename>")
+def serve_static_files(filename):
+    return send_from_directory(dist_path, filename)
+
 
 # API endpoint to retrieve documents
 @app.route("/api/search", methods=["GET"])
@@ -123,7 +137,7 @@ def search():
 # API endpoint to retrieve documents
 @app.route("/api/details/<int:doc_id>", methods=["GET"])
 def details(doc_id):
-    if not doc_id:
+    if doc_id is None:
         return jsonify({"error": "doc_id is required for text."}), 400
     
     # Process the document (text)
